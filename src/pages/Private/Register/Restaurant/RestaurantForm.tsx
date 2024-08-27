@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Button, TextField, Typography, Container, Box, Grid, Alert } from "@mui/material";
+import { Button, TextField, Typography, Container, Box, Grid, Alert, IconButton, InputAdornment } from "@mui/material";
 import { registerRestaurant } from "../../../../services/RestaurantService";
 import IRestaurantModel from "../../../../interfaces/IRestaurantModel";
 import { useApp } from "../../../../hooks/useApp";
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const RestaurantForm = () => {
     const [name, setName] = useState("");
@@ -12,6 +12,7 @@ const RestaurantForm = () => {
     const [openingHours, setOpeningHours] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -45,7 +46,7 @@ const RestaurantForm = () => {
             setAddres("");
             setReload(true);
         } catch (error: any) {
-            setErrorMessage(error.message || "Something went wrong.");
+            setErrorMessage(error.message || "Algo deu errado.");
             setSuccessMessage(null);
         }
     };
@@ -82,12 +83,25 @@ const RestaurantForm = () => {
                     <Grid item xs={12}>
                         <TextField
                             label="Senha"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             variant="outlined"
                             fullWidth
                             value={password}
                             required
                             onChange={(e) => setPassword(e.target.value)}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12}>

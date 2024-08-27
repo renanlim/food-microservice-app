@@ -24,10 +24,6 @@ const Login = () => {
         }
     };
 
-    const handleRedirectToSignup = () => {
-        navigate("/cadastro");
-    };
-
     const handleLogin = async () => {
         try {
             if (userType === "client") {
@@ -128,7 +124,7 @@ const Login = () => {
                         <Button
                             variant="text"
                             color="primary"
-                            onClick={handleRedirectToSignup}
+                            onClick={()=> {navigate("/cadastrar")}}
                             sx={{ ml: 1 }}
                         >
                             Cadastre-se

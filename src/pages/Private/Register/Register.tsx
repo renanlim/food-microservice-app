@@ -41,10 +41,8 @@ const Register = () => {
                     <ToggleButton value="client">Sou Cliente</ToggleButton>
                     <ToggleButton value="restaurant">Sou Restaurante</ToggleButton>
                 </ToggleButtonGroup>
-
                 {userType === "restaurant" && <RestaurantForm />}
                 {userType === "client" && <CustomerForm />}
-
             </Stack>
         </Container>
     );

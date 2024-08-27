@@ -1,21 +1,22 @@
 import { useState } from "react";
-import { Button, TextField, Typography, Container, Box, Grid, Alert } from "@mui/material";
+import { Button, TextField, Typography, Container, Box, Grid, Alert, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useApp } from "../../../../hooks/useApp";
 import ICustomerModel from "../../../../interfaces/ICustomerModel";
 import { registerCustomer } from "../../../../services/CustomerService";
 import { useContext } from "react";
 import { AppContext } from "../../../../context/AppContext";
 
-
 const CustomerForm = () => {
     const [name, setName] = useState("");
     const [address, setAddres] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { setReload, setCustomers, customers } = useApp(); // Adjusted to use the context
+    const { setReload, setCustomers, customers } = useApp();
     const { setCustomers: setGlobalCustomers } = useContext(AppContext);
 
     const handleSubmit = async () => {
@@ -53,6 +54,10 @@ const CustomerForm = () => {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev);
+    };
+
     return (
         <Container maxWidth="sm">
             <Box mt={4}>
@@ -85,12 +90,21 @@ const CustomerForm = () => {
                     <Grid item xs={12}>
                         <TextField
                             label="Senha"
-                            type="password"
                             variant="outlined"
                             fullWidth
+                            type={showPassword ? "text" : "password"}
                             value={password}
                             required
                             onChange={(e) => setPassword(e.target.value)}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={togglePasswordVisibility} edge="end">
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
+                            }}
                         />
                     </Grid>
                     <Grid item xs={12}>

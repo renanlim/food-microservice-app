@@ -1,7 +1,6 @@
 // src/router/index.js ou src/router.js
 import { createBrowserRouter } from "react-router-dom";
 import Login from "../pages/Login/Login";
-import Register from "../pages/Private/Register/Register";
 import Private from "../pages/Private";
 import RestaurantList from "../pages/Private/Restaurant/RestaurantList";
 import RestaurantItems from "../pages/Private/Items/RestaurantItems";
@@ -11,11 +10,16 @@ import EditRestaurant from "../pages/Private/Restaurant/EditRestaurant";
 import ManageItemsRestaurant from "../pages/Private/Restaurant/ManageItensRestaurant";
 import OrdersRestaurant from "../pages/Private/Restaurant/OrdersRestaurant";
 import EditCustomer from "../pages/Private/Customer/EditCustomer";
+import Register from "../pages/Private/Register/Register";
 
 const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />
+  },
+  {
+    path: "/cadastrar",
+    element: <Register />
   },
   {
     path: "/",
@@ -52,10 +56,6 @@ const router = createBrowserRouter([
       {
         path: "restaurante/pedidos",
         element: <OrdersRestaurant />
-      },
-      {
-        path: "cadastro",
-        element: <Register />
       }
     ],
   },
