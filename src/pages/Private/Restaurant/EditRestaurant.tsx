@@ -62,7 +62,7 @@ const EditRestaurant: React.FC = () => {
         <Container maxWidth="sm" sx={{ mt: 4 }}>
             <ArrowBackIcon onClick={() => navigate("/restaurante")} sx={{ cursor: "pointer" }} color='primary' fontSize='large' />
             <Typography variant="h4" gutterBottom>
-                Modificar Atributos da Empresa
+                Perfil da Empresa
             </Typography>
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}

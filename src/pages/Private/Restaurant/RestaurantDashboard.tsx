@@ -20,10 +20,10 @@ const RestaurantDashboard: React.FC = () => {
                     <Grid item xs={12} sm={6} md={4}>
                         <Button
                             variant="contained"
-                            onClick={() => handleNavigate('/restaurante/editar')}
+                            onClick={() => handleNavigate('/restaurante/perfil')}
                             fullWidth
                         >
-                            Modificar Atributos da Empresa
+                            Perfil da Empresa
                         </Button>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
