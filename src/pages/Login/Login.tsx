@@ -71,7 +71,7 @@ const Login = () => {
                 bgcolor="background.paper"
             >
                 <Box>
-                    <Typography variant="h1" fontFamily={"Pacifico"} textAlign="center" color={"#dc2f02"}>
+                    <Typography variant="h1" fontFamily={"Pacifico"} textAlign="center" color={"#BC0036"}>
                         PedeAí
                     </Typography>
                     <Typography variant="body1" fontFamily={"Montserrat"} textAlign="center" mb={2}>
@@ -141,7 +141,7 @@ const Login = () => {
                 width="50%"
                 height="100%"
                 sx={{
-                    backgroundImage: `url('/img_bg_login.jpg')`,
+                    backgroundImage: `url('/foodora-bike-delivery-street.jpg')`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat'

@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
     palette: {
         primary: {
-            main: '#dc2f02', 
+            main: '#BC0036', 
         },
         background: {
             default: '#edf2f4', 
@@ -20,10 +20,10 @@ export const theme = createTheme({
         MuiButton: {
             styleOverrides: {
                 root: {
-                    backgroundColor: '#dc2f02', 
+                    backgroundColor: '#BC0036', 
                     color: '#ffffff', 
                     '&:hover': {
-                        backgroundColor: '#b93e01', 
+                        backgroundColor: '#C7184A', 
                     },
                 },
             },

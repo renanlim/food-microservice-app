@@ -35,7 +35,7 @@ const Navbar = () => {
 
     return (
         <AppBar position="sticky">
-            <Toolbar sx={{ backgroundColor: "#dc2f02", padding: 4, justifyContent: "space-between" }}>
+            <Toolbar sx={{ backgroundColor: "#BC0036", padding: 4, justifyContent: "space-between" }}>
                 <Typography variant="h4" fontFamily={"Pacifico"} color={"white"}>
                     PedeAí
                 </Typography>
