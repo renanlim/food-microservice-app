@@ -3,7 +3,7 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./food-microservice-app
+      context: ../food-microservice-app
     container_name: frontend
     image: food-microservice-app
     ports:
