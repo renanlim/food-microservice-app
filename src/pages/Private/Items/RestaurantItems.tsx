@@ -25,7 +25,6 @@ const RestaurantItems: React.FC = () => {
   useEffect(() => {
     const fetchRestaurantItems = async () => {
       if (restaurantId) {
-        console.log("Fetching items for restaurant ID:", restaurantId); 
         const result = await getItemsByRestaurante(restaurantId);
         if ('message' in result) {
           setError(result.message);
