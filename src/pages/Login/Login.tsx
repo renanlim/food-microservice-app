@@ -1,6 +1,6 @@
-import { Box, Button, Stack, TextField, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material";
+import { Box, Button, Stack, TextField, Typography, ToggleButtonGroup, ToggleButton, Snackbar, Alert } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import { useApp } from "../../hooks/useApp";
 import { getCustomerByEmail } from "../../services/CustomerService";
 import { getRestaurantByEmail } from "../../services/RestaurantService";
@@ -10,10 +10,14 @@ const Login = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [userType, setUserType] = useState<"client" | "restaurant">("client");
+    const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+    const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+    const [snackbarSeverity, setSnackbarSeverity] = useState<"error" | "success">("error");
+
     const { setCustomerId, setCustomers, setLoggedIn, setCustomerName } = useApp();
     const { setRestaurantId, setRestaurants, setRestaurantName } = useRestaurant();
 
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     const handleUserTypeChange = (
         _event: React.MouseEvent<HTMLElement>,
@@ -33,9 +37,11 @@ const Login = () => {
                     setCustomers([customer]);
                     setLoggedIn(true);
                     setCustomerName(customer.name);
-                    navigate("/"); 
+                    navigate("/");
                 } else {
-                    alert("Credenciais inválidas para cliente.");
+                   setSnackbarMessage("Credenciais inválidas para cliente.");
+                    setSnackbarSeverity("error");
+                    setSnackbarOpen(true);
                 }
             } else if (userType === "restaurant") {
                 const restaurant = await getRestaurantByEmail(email);
@@ -44,15 +50,23 @@ const Login = () => {
                     setRestaurants([restaurant]);
                     setLoggedIn(true);
                     setRestaurantName(restaurant.name);
-                    navigate("/restaurante"); 
+                    navigate("/restaurante");
                 } else {
-                    alert("Credenciais inválidas para restaurante.");
+                    setSnackbarMessage("Credenciais inválidas para restaurante.");
+                    setSnackbarSeverity("error");
+                    setSnackbarOpen(true);
                 }
             }
         } catch (error) {
             console.error("Erro ao fazer login:", error);
-            alert("Erro ao fazer login. Tente novamente.");
+            setSnackbarMessage("Erro ao fazer login. Tente novamente.");
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -124,7 +138,7 @@ const Login = () => {
                         <Button
                             variant="text"
                             color="primary"
-                            onClick={()=> {navigate("/cadastrar")}}
+                            onClick={() => { navigate("/cadastrar") }}
                             sx={{ ml: 1 }}
                         >
                             Cadastre-se
@@ -132,6 +146,17 @@ const Login = () => {
                     </Typography>
                 </Box>
             </Box>
+
+            <Snackbar
+                        open={snackbarOpen}
+                        autoHideDuration={6000}
+                        onClose={handleCloseSnackbar}
+                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    >
+                        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                            {snackbarMessage}
+                        </Alert>
+                    </Snackbar>
 
             <Box
                 width="50%"
