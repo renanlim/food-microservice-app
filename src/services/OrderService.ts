@@ -79,3 +79,36 @@ export const calculateOrder = async (idOrder: string): Promise<IOrderItemModel[]
         };
     }
 };
+
+export const cancelOrderByClient = async (idOrder: string, customerId: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+        await axios.patch(`${API_URL}/ms-order/order/${idOrder}/cancelar`, { customerId }, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return { success: true };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || "Erro ao cancelar o pedido.",
+        };
+    }
+};
+
+
+export const denyOrderByRestaurant = async (idOrder: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+        await axios.patch(`${API_URL}/ms-order/order/${idOrder}/negar`, {}, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return { success: true };
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || "Erro ao negar o pedido.",
+        };
+    }
+};

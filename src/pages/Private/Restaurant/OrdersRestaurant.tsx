@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import IOrderModel from '../../../interfaces/IOrderModel';
 import IOrderItemModel from '../../../interfaces/IOrderItemModel';
-import { listOrders, updateOrderStatus } from '../../../services/OrderService';
+import { listOrders, updateOrderStatus, denyOrderByRestaurant } from '../../../services/OrderService';
 import { useRestaurant } from '../../../hooks/useRestaurant';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
@@ -34,9 +34,7 @@ const OrdersRestaurant = () => {
   const [selectedOrder, setSelectedOrder] = useState<IOrderModel | null>(null);
   const [newStatus, setNewStatus] = useState<string>('');
 
-
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -63,15 +61,23 @@ const OrdersRestaurant = () => {
   const confirmStatusChange = async () => {
     if (selectedOrder) {
       try {
-        if (selectedOrder.idOrder) {
-          await updateOrderStatus(selectedOrder.idOrder, newStatus);
-          const response = await listOrders();
-          if ('message' in response) {
-            setError(response.message);
-          } else {
-            const filteredOrders = response.filter(order => order.idRestaurant === restaurantId);
-            setOrders(filteredOrders);
+        if (newStatus === "NEGADO") {
+          const result = await denyOrderByRestaurant(selectedOrder.idOrder || "");
+          if (!result.success) {
+            throw new Error(result.message || "Erro ao negar o pedido.");
           }
+        } else {
+          if (selectedOrder.idOrder) {
+            await updateOrderStatus(selectedOrder.idOrder, newStatus);
+          }
+        }
+
+        const response = await listOrders();
+        if ('message' in response) {
+          setError(response.message);
+        } else {
+          const filteredOrders = response.filter(order => order.idRestaurant === restaurantId);
+          setOrders(filteredOrders);
         }
       } catch (error) {
         console.error("Erro ao atualizar o status do pedido:", error);
@@ -108,56 +114,63 @@ const OrdersRestaurant = () => {
       <Typography variant="h4" gutterBottom>
         Pedidos do Restaurante
       </Typography>
-      <Grid container spacing={4}>
-        {orders.map((order) => (
-          <Grid item xs={12} key={order.idOrder}>
-            <Card>
-              <CardContent>
-                <Typography variant="subtitle1">Observação:</Typography>
-                <Typography variant="body2" gutterBottom>
-                  {order.observation}
-                </Typography>
-                <Typography variant="subtitle1">Itens:</Typography>
-                <Grid container spacing={2}>
-                  {order.items.map((item: IOrderItemModel) => (
-                    <Grid item xs={12} sm={6} md={4} key={item.idOrderItem}>
-                      <Card variant="outlined">
-                        <CardContent>
-                          <Typography variant="body2" gutterBottom>
-                            {item.name}
-                          </Typography>
-                          <Typography variant="body2">
-                            Quantidade: {item.quantity}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-                <Box sx={{ mt: 2 }}>
-                  <FormControl fullWidth>
-                    <InputLabel id="select-label">Status do Pedido</InputLabel>
-                    <Select
-                      labelId="select-label"
-                      id="select-status"
-                      value={order.status || ""}
-                      label="Status do Pedido"
-                      onChange={(e) => handleStatusChange(order, e.target.value as string)}
-                    >
-                      <MenuItem value="em análise">Em Análise</MenuItem>
-                      <MenuItem value="preparando">Preparando</MenuItem>
-                      <MenuItem value="pronto">Pronto</MenuItem>
-                      <MenuItem value="em rota para entrega">Em Rota para Entrega</MenuItem>
-                      <MenuItem value="entregue">Entregue</MenuItem>
-                      <MenuItem value="cancelado">Cancelado</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {orders.length === 0 ? (
+        <Typography variant="body1" color="textSecondary">
+          Nenhum pedido encontrado.
+        </Typography>
+      ) : (
+        <Grid container spacing={4}>
+          {orders.map((order) => (
+            <Grid item xs={12} key={order.idOrder}>
+              <Card>
+                <CardContent>
+                  {order.observation && <Typography variant="subtitle1">Observação:</Typography>}
+                  <Typography variant="body2" gutterBottom>
+                    {order.observation}
+                  </Typography>
+                  <Typography variant="subtitle1">Itens:</Typography>
+                  <Grid container spacing={2}>
+                    {order.items.map((item: IOrderItemModel) => (
+                      <Grid item xs={12} sm={6} md={4} key={item.idOrderItem}>
+                        <Card variant="outlined">
+                          <CardContent>
+                            <Typography variant="body2" gutterBottom>
+                              {item.name}
+                            </Typography>
+                            <Typography variant="body2">
+                              Quantidade: {item.quantity}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <Box sx={{ mt: 2 }}>
+                    <FormControl fullWidth>
+                      <InputLabel id="select-label">Status do Pedido</InputLabel>
+                      <Select
+                        labelId="select-label"
+                        id="select-status"
+                        value={order.status || ""}
+                        label="Status do Pedido"
+                        onChange={(e) => handleStatusChange(order, e.target.value as string)}
+                      >
+                        <MenuItem value="AGUARDANDO CONFIRMAÇÃO">AGUARDANDO CONFIRMAÇÃO</MenuItem>
+                        <MenuItem value="CONFIRMADO">CONFIRMADO</MenuItem>
+                        <MenuItem value="NEGADO">NEGADO</MenuItem>
+                        <MenuItem value="PREPARANDO">PREPARANDO</MenuItem>
+                        <MenuItem value="A CAMINHO">A CAMINHO</MenuItem>
+                        <MenuItem value="ENTREGUE">ENTREGUE</MenuItem>
+                        <MenuItem value="CANCELADO">CANCELADO</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       <Dialog
         open={openModal}

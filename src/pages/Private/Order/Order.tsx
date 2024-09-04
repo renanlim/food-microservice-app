@@ -1,19 +1,20 @@
-import { useEffect, useState } from "react";
-import { useApp } from "../../../hooks/useApp";
-import { listOrders } from "../../../services/OrderService";
-import { getRestaurantById } from "../../../services/RestaurantService";
-import IOrderModel from "../../../interfaces/IOrderModel";
-import { Container, Typography, List, ListItem, ListItemText, Alert, Card, Box, CardContent, Stack } from "@mui/material";
-import { useRestaurant } from "../../../hooks/useRestaurant";
+import React, { useState, useEffect } from 'react';
+import { useApp } from '../../../hooks/useApp';
+import { listOrders, cancelOrderByClient } from '../../../services/OrderService';
+import { getRestaurantById } from '../../../services/RestaurantService';
+import IOrderModel from '../../../interfaces/IOrderModel';
+import { Container, Typography, List, ListItem, ListItemText, Alert, Card, Box, CardContent, Stack, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useRestaurant } from '../../../hooks/useRestaurant';
 
-
-const Order = () => {
+const Order: React.FC = () => {
     const [orders, setOrders] = useState<IOrderModel[]>([]);
     const [restaurants, setRestaurants] = useState<Map<string, string>>(new Map());
     const [error, setError] = useState<string | null>(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState<string | undefined>(undefined);
+    const [canceling, setCanceling] = useState(false);
     const { customerId } = useApp();
     const { restaurantId } = useRestaurant();
-
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -52,7 +53,36 @@ const Order = () => {
         };
 
         fetchOrders();
-    }, [customerId, restaurantId]);
+    }, [customerId, restaurantId, orders]);
+
+    const handleCancelOrder = async () => {
+        if (!selectedOrderId || !customerId) {
+            setError("ID do pedido ou cliente não está disponível.");
+            return;
+        }
+
+        setCanceling(true);
+
+        const result = await cancelOrderByClient(selectedOrderId, customerId);
+        if (result.success) {
+            setOrders(orders.filter(order => order.idOrder !== selectedOrderId));
+            setDialogOpen(false);
+            setCanceling(false);
+        } else {
+            setError(result.message || "Erro desconhecido ao cancelar o pedido.");
+            setCanceling(false);
+        }
+    };
+
+    const handleOpenDialog = (orderId: string | undefined) => {
+        setSelectedOrderId(orderId);
+        setDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+        setSelectedOrderId(undefined);
+    };
 
     const calculateTotalPrice = (items: { price: number; quantity: number }[]) => {
         return items.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2);
@@ -60,23 +90,24 @@ const Order = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'em análise':
+            case 'AGUARDANDO CONFIRMAÇÃO':
                 return '#f0ad4e';
-            case 'preparando':
+            case 'CONFIRMADO':
                 return '#5bc0de';
-            case 'pronto':
-                return '#5cb85c';
-            case 'em rota para entrega':
-                return '#f0ad4e';
-            case 'entregue':
-                return '#4cae4c';
-            case 'cancelado':
-                return '#6c757d';
+            case 'CANCELADO':
+                return '#686D76';
+            case 'NEGADO':
+                return '#686D76';
+            case 'PREPARANDO':
+                return '#FF7F3E';
+            case 'A CAMINHO':
+                return '#80AF81';
+            case 'ENTREGUE':
+                return '#06D001';
             default:
                 return '#ffffff';
         }
     };
-
 
     return (
         <Container>
@@ -133,6 +164,22 @@ const Order = () => {
                                             <Typography variant="h6" sx={{ mt: 2 }}>
                                                 Total: R$ {calculateTotalPrice(order.items)}
                                             </Typography>
+                                            <Button 
+                                                variant="contained" 
+                                                color="error" 
+                                                onClick={() => handleOpenDialog(order.idOrder)} 
+                                                sx={{ mt: 2 }}
+                                                disabled={
+                                                    order.status === 'CANCELADO' || 
+                                                    order.status === 'NEGADO' || 
+                                                    order.status === 'CONFIRMADO' ||
+                                                    order.status === 'PREPARANDO' ||
+                                                    order.status === 'A CAMINHO' ||
+                                                    order.status === 'ENTREGUE'
+                                                }
+                                            >
+                                                Cancelar Pedido
+                                            </Button>
                                         </Stack>
                                     </CardContent>
                                 </Card>
@@ -143,6 +190,32 @@ const Order = () => {
                     <Typography variant="body1">Nenhum pedido encontrado.</Typography>
                 )}
             </Box>
+
+            <Dialog
+                open={dialogOpen}
+                onClose={handleCloseDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    Confirmar Cancelamento
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1">
+                        Tem certeza de que deseja cancelar este pedido?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog}>Cancelar</Button>
+                    <Button
+                        onClick={handleCancelOrder}
+                        color="error"
+                        disabled={canceling}
+                    >
+                        {canceling ? 'Cancelando...' : 'Confirmar'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, TextField, Button, Alert, Box, IconButton, InputAdornment } from '@mui/material';
+import {
+    Container,
+    Typography,
+    TextField,
+    Button,
+    Alert,
+    Box,
+    IconButton,
+    InputAdornment,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle
+} from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useRestaurant } from '../../../hooks/useRestaurant';
-import { getRestaurantById, updateRestaurant } from '../../../services/RestaurantService';
+import { getRestaurantById, updateRestaurant, deleteRestaurant } from '../../../services/RestaurantService';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApp } from '../../../hooks/useApp';
@@ -14,6 +27,7 @@ const EditRestaurant: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,15 +43,15 @@ const EditRestaurant: React.FC = () => {
             }
         };
         fetchRestaurant();
-    }, [restaurantId]);
-    
+    }, [restaurantId, setReload]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRestaurant({
             ...restaurant,
             [e.target.name]: e.target.value,
         });
     };
-    
+
     const handleSubmit = async () => {
         if (restaurant) {
             try {
@@ -56,7 +70,26 @@ const EditRestaurant: React.FC = () => {
         setShowPassword(!showPassword);
     };
 
-    
+    const handleDelete = async () => {
+        if (restaurantId) {
+            try {
+                await deleteRestaurant(restaurantId);
+                setReload(true);
+                navigate('/login');
+            } catch (error: any) {
+                setError(error.message || 'Erro ao excluir o restaurante.');
+            }
+            setOpenDeleteDialog(false);
+        }
+    };
+
+    const handleOpenDeleteDialog = () => {
+        setOpenDeleteDialog(true);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setOpenDeleteDialog(false);
+    };
 
     return (
         <Container maxWidth="sm" sx={{ mt: 4 }}>
@@ -133,11 +166,42 @@ const EditRestaurant: React.FC = () => {
                         variant="contained"
                         onClick={handleSubmit}
                         fullWidth
+                        sx={{ mb: 2 }}
                     >
                         Salvar Alterações
                     </Button>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={handleOpenDeleteDialog}
+                        fullWidth
+                    >
+                        Excluir Restaurante
+                    </Button>
                 </Box>
             )}
+
+            <Dialog
+                open={openDeleteDialog}
+                onClose={handleCloseDeleteDialog}
+                aria-labelledby="delete-dialog-title"
+                aria-describedby="delete-dialog-description"
+            >
+                <DialogTitle id="delete-dialog-title">
+                    Confirmar Exclusão
+                </DialogTitle>
+                <DialogContent>
+                    <Typography id="delete-dialog-description">
+                        Você tem certeza de que deseja excluir este restaurante? Esta ação não pode ser desfeita.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
+                    <Button onClick={handleDelete} color="error">
+                        Excluir
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Container>
     );
 };

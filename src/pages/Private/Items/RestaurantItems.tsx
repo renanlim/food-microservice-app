@@ -106,7 +106,7 @@ const RestaurantItems: React.FC = () => {
     const order: IOrderModel = {
       idRestaurant: restaurantId,
       idCustomer: customerId,
-      status: 'em análise',
+      status: 'AGUARDANDO CONFIRMAÇÃO',
       payment: paymentMethod,
       observation: observation,
       items: orderItems,
